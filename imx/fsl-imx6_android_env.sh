@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 
+_Tr=$(tput sgr0) # Text reset.
+_Br=$(tput setab 1) # Red
+
 NOWTIME=`date +%y%m%d-%02k%02M%02S`
 AROOT=`pwd`
 #AVER=5.0.2_r1
@@ -36,7 +39,7 @@ fi
 
 
 if [ "${AVER}" = "5.0.2_r1" ]; then
-	TARBALLDIR=${AROOT}/../tarball
+	TARBALLDIR=/home/span/workshop/git/android/tarball
 	aTARBALL=android-5.0.2_r1_src_imx.tar.xz
 	kTARBALL=kernel_imx_src_l5.0.0_1.0.0-ga.tar.xz
 	uTARBALL=uboot-imx_src_l5.0.0_1.0.0-ga.tar.xz
@@ -46,7 +49,7 @@ if [ "${AVER}" = "5.0.2_r1" ]; then
 	uTARURL=ftp://ftpuser:ftpuser@${SRCURL}/home/freescale/src/L5/${uTARBALL}
 fi
 if [ "${AVER}" = "4.4.3_r1" ]; then
-	TARBALLDIR=${AROOT}/../tarball
+	TARBALLDIR=/home/span/workshop/git/android/tarball
 	aTARBALL=android-4.4.3_r1_src_imx_patched.tar.xz
 	kTARBALL=kernel_imx_src_kk4.4.3_2.0.0-ga.tar.xz
 	uTARBALL=uboot-imx_src_kk4.4.3_2.0.0-ga.tar.xz
@@ -56,7 +59,7 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	PATCH001=linux-2.6-imx-d40d224c1db101382b14753520aa3408715380e3.patch
 fi
 if [ "${AVER}" = "4.2.2_r1" ]; then
-	TARBALLDIR=${AROOT}/../tarball
+	TARBALLDIR=/home/span/workshop/git/android/tarball
 	aTARBALL=android_src_jb4.2.2_1.1.0-ga-patched.tar.xz
 	kTARBALL=kernel_imx_src_jb4.2.2_1.1.0-ga.tar.xz
 	uTARBALL=uboot-imx_src_jb4.2.2_1.1.0-ga.tar.xz
@@ -66,6 +69,8 @@ if [ "${AVER}" = "4.2.2_r1" ]; then
 fi
 
 
+WSFOLDER=anadroid-fsl
+WSPATH=${AROOT}/${WSFOLDER}
 AFOLDER=android-${AVER}
 
 echo "**************************************************"
@@ -78,7 +83,10 @@ echo "**************************************************"
 
 #export JAVA_HOME=/home/workshop/bin/jdk1.6.0_45/bin
 #export PATH=/home/workshop/bin/jdk1.6.0_45/bin:$PATH
-cd ${AROOT}
+if [ ! -d ${WSFOLDER} ]; then
+	mkdir -p ${WSPATH}
+fi
+cd ${WSPATH}
 echo $PATH
 which java
 java -version
@@ -101,7 +109,8 @@ fi
 cd -
 
 echo "killing old build tree ... "
-rm -rf myandroid
+rm -rf ${AVER}_src
+#rm -rf myandroid
 rm -rf ${AFOLDER}
 if [ "clean" = "${USERP1}" -o "clr" = "${USERP1}" -o "c" = "${USERP1}" ]; then
 	echo "clean done ... "
@@ -111,8 +120,9 @@ if [ "clean" = "${USERP1}" -o "clr" = "${USERP1}" -o "c" = "${USERP1}" ]; then
 fi
 
 echo "restore build tree ... "
-tar xvf ${TARBALLDIR}/${aTARBALL}
-ln -s myandroid ${AFOLDER}
+mkdir ${AVER}_src
+tar xvf ${TARBALLDIR}/${aTARBALL} -C ${AVER}_src/
+ln -s ${AVER}_src/myandroid ${AFOLDER}
 
 cd ${AFOLDER}
 tar xvf ${TARBALLDIR}/${kTARBALL}
