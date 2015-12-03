@@ -1,0 +1,257 @@
+
+
+if you want to build the package from <freescale>, you will need help from following instruction.
+<http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=i.MX6Q&fpsp=1&tab=Design_Tools_Tab>
+Those instruction helps you build android image without hurt.
+
+
+start condition:
+1. ubuntu distribution <12.04.2 desktop amd64>. 12.04 will be more easier than other version 10.04,10.10,11.10 ...
+<http://releases.ubuntu.com/precise/>
+<http://releases.ubuntu.com/precise/ubuntu-12.04.2-desktop-amd64.iso>
+2. freescale i.mx6q android package jelly bean 4.2.2_r1. this is the latest one I got for this note.
+
+steps:
+01. install/setup ubuntu 12.04.2 pn your machine. you can setup your build machine on both real or virtual machine. the install procedure will be skipped here since there is nothing special at all.
+
+02. install/setup package that required for android build. 
+$ sudo apt-get install uuid uuid-dev uuid-dev:i386 zlib1g-dev liblz-dev liblzo2-2 liblzo2-dev:i386
+$ sudo apt-get install vim
+$ sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-dri:i386 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386 minicom tftpd uboot-mkimage expect
+$ sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+
+03. install/setup oracle JDK 6 from binary. pick up any revision will be ok, while I use 6u45.
+<http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR> 
+
+<setup oracle jdk 6>
+$ chmod a+x jdk-6uXX-linux-x64.bin
+$ ./jdk-6uXX-linux-x64.bin
+$ sudo mkdir -p /usr/lib/jvm
+$ sudo mv jdk1.6.0_XX /usr/lib/jvm/
+$ sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.6.0_XX/bin/java" 1
+$ sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.6.0_XX/bin/javac" 1
+$ sudo update-alternatives --config java
+$ sudo update-alternatives --config javac
+
+04. download the source from freescale website. click the download button in catalog "operating system software board support packages" in <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=i.MX6Q&fpsp=1&tab=Design_Tools_Tab>
+android_jb4.2.2_1.1.0-ga.tar.gz will be downloaded in size 287.3MB
+source code located in android_jb4.2.2_1.1.0-ga_source.tar.gz
+code setup instruction can be found in docs/Android_User_Guide.pdf
+
+05. get android jelly bean source from google.
+$ cd ${codebase}/src
+$ mkdir android-4.2.2_r1
+$ cd android-4.2.2_r1
+$ curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ./repo
+$ chmod a+x ./repo
+$ ./repo init -u https://android.googlesource.com/platform/manifest -b android-4.2.2_r1
+$ ./repo sync
+
+06. get the kernel/u-boot source code from freescale.
+$ cd ${codebase}/src
+$ git clone git://git.freescale.com/imx/linux-2.6-imx.git kernel_imx
+$ cd kernel_imx
+$ git checkout jb4.2.2_1.1.0-ga
+
+$ cd ${codebase}/src
+$ git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx
+$ cd uboot-imx
+$ git checkout jb4.2.2_1.1.0-ga
+
+07. patch code for freescale i.MX
+$ cd ${codebase}/src
+$ cp -R android-4.2.2_r1 android-4.2.2_r1_patched
+$ cd android-4.2.2_r1_patched
+$ cp -R ../kernel_imx ./
+$ cd bootable/bootloader
+$ cp -R ../../../uboot-imx ./
+$ cd ${codebase}/src/android-4.2.2_r1_patched
+$ source /path-to-freescale-source-package/android_jb4.2.2_1.1.0-ga_source/code/jb4.2.2_1.1.0-ga/and_patch.sh
+$ c_patch /path-to-freescale-source-package/android_jb4.2.2_1.1.0-ga_source/code/jb4.2.2_1.1.0-ga imx_jb4.2.2_1.1.0-ga
+
+**************************************************************
+Success: Now you can build the Android code for FSL i.MX platform
+**************************************************************
+
+08. build android/freescale source
+$ cd ${codebase}/src/android-4.2.2_r1_patched
+$ source build/envsetup.sh
+$ lunch sabresd_6dq-user
+$ make -j8
+
+
+
+
+
+
+
+ubuntu 10.04 x64
+ubuntu 11.10 x64
+ubuntu 12.04 x64
+
+It's recommanded to use ubuntu 10.04 64bit for android build
+ubuntu 10.04 x64
+google: 10.04~11.10,12.04
+Ti: 10.04,12.04
+freescale: 10.10,11.04
+
+<best reference from Ti site>
+http://processors.wiki.ti.com/index.php/TI-Android-JB-4.1.2-DevKit-4.0.1_DeveloperGuide
+
+<down grade gcc version on ubuntu 12.04>
+sudo apt-get install gcc-4.4 g++-4.4 gcc-4.4-multilib g++-4.4-multilib
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.4
+or
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 50 --slave /usr/bin/g++ g++ /usr/bin/g++-4.4 --slave /usr/bin/gcov gcov /usr/bin/g++-4.4
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6 --slave /usr/bin/gcov gcov /usr/bin/g++-4.6
+sudo update-alternatives --config gcc
+>>> use the 4.4
+gcc -v
+g++ -v
+
+<12/04,4.0.4>
+sudo apt-get install uuid uuid-dev zlib1g-dev liblz-dev liblzo2-2 liblzo2-dev
+<12.04,4.2.2>
+sudo apt-get install uuid uuid-dev uuid-dev:i386 zlib1g-dev liblz-dev liblzo2-2 liblzo2-dev:i386
+sudo apt-get install vim
+
+sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib mingw32 openjdk-6-jdk tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386 minicom tftpd uboot-mkimage expect
+
+<setup in 12.04>
+sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-dri:i386 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386 minicom tftpd uboot-mkimage expect
+
+
+< install java jdk6>
+you will need sun java6 jdk for java build
+to setup java6 jdk on 10.04 ubuntu, please check below:
+ref:http://rathodpratik.wordpress.com/2012/11/17/install-java6-on-ubuntu/
+$ sudo add-apt-repository ppa:ferramroberto/java
+$ sudo apt-get update
+$ sudo apt-get install sun-java6-jdk
+
+<direct download binsry from oracle, 12.04>
+http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
+
+<oracle accout info>
+spanliu@yahoo.com.tw
+Oracle999
+
+<setup oracle sdk>
+$ chmod a+x jdk-6uXX-linux-x64.bin
+$ ./jdk-6uXX-linux-x64.bin
+$ sudo mkdir -p /usr/lib/jvm
+$ sudo mv jdk1.6.0_XX /usr/lib/jvm/
+$ sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.6.0_XX/bin/java" 1
+$ sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.6.0_XX/bin/javac" 1
+$ sudo update-alternatives --config java
+$ sudo update-alternatives --config javac
+
+<install gcc-4.4>
+sudo apt-get install gcc-4.4 g++-4.4 g++-4.4-multilib
+
+<info from google android site>
+all android build instruction reviewed in page below:
+http://source.android.com/source/index.html
+
+setup neccessary package for android build on ubuntu 10.04 x64 and after
+
+<build setup>
+10.04+
+sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc
+
+On Ubuntu 10.10:
+$ sudo ln -s /usr/lib32/mesa/libGL.so.1 /usr/lib32/mesa/libGL.so
+
+On Ubuntu 11.10:
+$ sudo apt-get install libx11-dev:i386
+
+12.04+
+$ sudo apt-get install git gnupg flex bison gperf build-essential zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386
+$ sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+sudo apt-get install uuid uuid-dev
+sudo apt-get install zlib1g-dev liblz-dev
+sudo apt-get install liblzo2-2 liblzo2-dev
+
+??sudo apt-get install liblzo2-dev:i386
+
+sudo apt-get autoremove ...
+
+sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs x11proto-core-dev libx11-dev lib32readline5-dev lib32z-dev libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc
+
+sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs x11proto-core-dev libx11-dev lib32readline-gplv2-dev lib32z-dev libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown libxml2-utils xsltproc
+
+
+setup neccessary package for android build on ubuntu 11.10 x64
+sudo apt-get install libx11-dev:i386
+
+<install mkimage>
+$ sudo apt-get install uboot-mkimage
+
+<install ccache>
+$ sudo apt-get install ccache
+
+<if you need git upgrade>
+setup git package 1.7.2 or above (1.7.0.4 by default in ubuntu 10.04)
+sudo add-apt-repository ppa:git-core/ppa
+sudo apt-get update
+sudo apt-get install git
+
+<setup user info for git>
+git config --global user.email "spdroid@gmail.com"
+git config --global user.name "spdroid"
+
+<android device info>
+JSR78D
+android-4.3_r2
+Nexus 7 (deb)
+
+
+<repo android source>
+curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ./repo
+chmod a+x ~/bin/repo
+
+setup email info if you got problem in source git.
+git config --global user.email "spdroid@gmail.com"
+git config --global user.name "spdroid"
+
+get source with repo
+repo init -u https://android.googlesource.com/platform/manifest
+repo init -u https://android.googlesource.com/platform/manifest -b android-4.3_r2
+repo sync
+
+<android usb>
+/etc/udev/rules.d/51-android.rules
+
+
+/usr/lib/jvm/jdk1.6.0_25/bin/jar
+JAVA_HOME=/usr/lib/jvm/jdk1.6.0_25
+export JAVA_HOME
+
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+
+<ccache>
+export USE_CCACHE=1
+export CCACHE_DIR=<path-to-your-cache-directory>
+
+prebuilts/misc/linux-x86/ccache/ccache -M 50G
+
+<android out path>
+export OUT_DIR_COMMON_BASE=<path-to-your-out-directory>
+
+export OUT_DIR_COMMON_BASE=/home/span/workshop/build/android-4.3_r2/out
+
+<dash issue>
+build/envsetup.sh: 1: Syntax error: "(" unexpected You probably have dash enabled. Disable dash by running 
+$ sudo dpkg-reconfigure dash
+answer NO
+
+
+for usb adb 
+/etc/udev/rules.d/51-android.rules
+
+
+
+
+
