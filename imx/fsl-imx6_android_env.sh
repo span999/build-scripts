@@ -17,13 +17,13 @@ USERIN=$1
 USERP1=$2
 
 if [ "${USERIN}" = "" ]; then
-	echo "no user input !! try <443> or <422> or <502>"
+	echo "no user input !! try <443> or <422> or <502> or <rogue>"
 	exit
 fi
 
-if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" ]; then
+if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "rogue" ]; then
 	echo "  user input =<${USERIN}> para1 =<${USERP1}>"
-	if [ "${USERIN}" = "443" ]; then
+	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" ]; then
 		AVER=4.4.3_r1
 	fi
 	if [ "${USERIN}" = "422" ]; then
@@ -33,7 +33,7 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" ]; then
 		AVER=5.0.2_r1
 	fi
 else
-	echo "wrong user input !! try <443> or <422> or <502>"
+	echo "wrong user input !! try <443> or <422> or <502> or <rogue>"
 	exit
 fi
 
@@ -49,6 +49,9 @@ if [ "${AVER}" = "5.0.2_r1" ]; then
 	uTARURL=ftp://ftpuser:ftpuser@${SRCURL}/home/freescale/src/L5/${uTARBALL}
 fi
 if [ "${AVER}" = "4.4.3_r1" ]; then
+	if [ "${USERIN}" = "rogue" ]; then
+	echo "setup for rogue build."
+	else
 	TARBALLDIR=/home/span/workshop/git/android/tarball
 	aTARBALL=android-4.4.3_r1_src_imx_patched.tar.xz
 	kTARBALL=kernel_imx_src_kk4.4.3_2.0.0-ga.tar.xz
@@ -57,6 +60,7 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	kTARURL=ftp://ftpuser:ftpuser@${SRCURL}/home/freescale/src/kk4.4.3/${kTARBALL}
 	uTARURL=ftp://ftpuser:ftpuser@${SRCURL}/home/freescale/src/kk4.4.3/${uTARBALL}
 	PATCH001=linux-2.6-imx-d40d224c1db101382b14753520aa3408715380e3.patch
+	fi
 fi
 if [ "${AVER}" = "4.2.2_r1" ]; then
 	TARBALLDIR=/home/span/workshop/git/android/tarball
@@ -69,9 +73,30 @@ if [ "${AVER}" = "4.2.2_r1" ]; then
 fi
 
 
-WSFOLDER=anadroid-fsl
+if [ "${USERIN}" = "rogue" ]; then
+	WSFOLDER=rogue-fsl
+else
+	WSFOLDER=anadroid-fsl
+fi
 WSPATH=${AROOT}/${WSFOLDER}
 AFOLDER=android-${AVER}
+
+if [ "${USERIN}" = "rogue" ]; then
+	cd ${WSPATH}
+	cd ${AFOLDER}
+	git checkout N535-Rogue-AVM
+	cd -
+	cd kernel_imx
+	git checkout N535-Rogue-AVM
+	cd -
+	cd kernel_imx
+	git checkout N535-Rogue-AVM
+	cd -
+	
+	echo ""
+	echo "ready for rogue build."
+	exit 0
+fi
 
 echo "**************************************************"
 echo "build folder root=${AROOT}"
