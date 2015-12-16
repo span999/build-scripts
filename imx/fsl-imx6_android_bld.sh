@@ -21,13 +21,13 @@ AVER=4.4.3_r1
 USERIN=$1
 
 if [ "${USERIN}" = "" ]; then
-	echo "no user input !! try <443> or <422> or <502>"
+	echo "no user input !! try <443> or <422> or <502> or <rogue>"
 	exit
 fi
 
-if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" ]; then
+if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "rogue" ]; then
 	echo "  user input =<${USERIN}> para1 =<${USERP1}>"
-	if [ "${USERIN}" = "443" ]; then
+	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" ]; then
 		AVER=4.4.3_r1
 	fi
 	if [ "${USERIN}" = "422" ]; then
@@ -37,13 +37,18 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" ]; then
 		AVER=5.0.2_r1
 	fi
 else
-	echo "wrong user input !! try <443> or <422> or <502>"
+	echo "wrong user input !! try <443> or <422> or <502> or <rogue>"
 	exit
 fi
 
 
-WSFOLDER=anadroid-fsl
+if [ "${USERIN}" = "rogue" ]; then
+	WSFOLDER=rogue-fsl
+else
+	WSFOLDER=anadroid-fsl
+fi
 WSPATH=${AROOT}/${WSFOLDER}
+OUT_DIR=${AROOT}/${WSFOLDER}/out
 AFOLDER=android-${AVER}
 #BUBOARD=aosp_arm-eng  #for original android build
 BUBOARD=sabresd_6dq
@@ -63,6 +68,10 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
+if [ "${USERIN}" = "rogue" ]; then
+	BUMODE=eng
+	LUNCHTYPE=${BUBOARD}-${BUMODE}
+fi
 if [ "${AVER}" = "4.2.2_r1" ]; then
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
@@ -71,6 +80,7 @@ fi
 echo "**************************************************"
 echo "ROOT=${AROOT}"
 echo "AFOLDER=${AFOLDER}"
+echo "OUT_DIR=${OUT_DIR}"
 echo "AVER=${AVER}"
 echo "LUNCHTYPE=${LUNCHTYPE}"
 echo "**************************************************"
@@ -84,6 +94,7 @@ export USE_CCACHE=1
 #prebuilts/misc/linux-x86/ccache/ccache -M 25G
 CCACHE_BIN=`find ./ -type f -path "*linux-x86*" -name \ccache`
 ${CCACHE_BIN} -M 25G
+export OUT_DIR_COMMON_BASE=${OUT_DIR}
 
 . build/envsetup.sh
 lunch ${LUNCHTYPE}
@@ -94,6 +105,7 @@ which java
 uname -a >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 echo "ROOT=${AROOT}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 echo "AFOLDER=${AFOLDER}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+echo "OUT_DIR=${OUT_DIR}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 echo "AVER=${AVER}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 echo "LUNCHTYPE=${LUNCHTYPE}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 echo "**************************************************" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
