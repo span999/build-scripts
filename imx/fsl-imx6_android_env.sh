@@ -82,6 +82,9 @@ WSPATH=${AROOT}/${WSFOLDER}
 AFOLDER=android-${AVER}
 
 if [ "${USERIN}" = "rogue" ]; then
+	if [ ! -d ${WSPATH} ]; then
+		mkdir -p ${WSPATH} 
+	fi
 	cd ${WSPATH}
 	if [ ! -d ${AFOLDER} ]; then
 		git clone git@mbg-rd4-codesvr.mic.com.tw:n535/android-4.4.3_r1.git ${AFOLDER} -b N535-Rogue-AVM
@@ -89,6 +92,7 @@ if [ "${USERIN}" = "rogue" ]; then
 	fi
 	cd ${AFOLDER}
 	git checkout N535-Rogue-AVM
+	git pull
 	cd -
 
 	if [ ! -d kernel_imx ]; then
@@ -97,14 +101,16 @@ if [ "${USERIN}" = "rogue" ]; then
 	fi
 	cd kernel_imx
 	git checkout N535-Rogue-AVM
+	git pull
 	cd -
 
 	if [ ! -d uboot-imx  ]; then
-		git clone git@mbg-rd4-codesvr.mic.com.tw:n535/uboot-imx .git uboot-imx  -b N535-Rogue-AVM
+		git clone git@mbg-rd4-codesvr.mic.com.tw:n535/uboot-imx.git uboot-imx -b N535-Rogue-AVM
 		##git clone git@113.196.154.157:n535/uboot-imx.git uboot-imx -b N535-Rogue-AVM
 	fi
 	cd uboot-imx 
 	git checkout N535-Rogue-AVM
+	git pull
 	cd -
 	
 	echo ""
