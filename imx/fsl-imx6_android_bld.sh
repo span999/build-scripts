@@ -57,6 +57,9 @@ BUBOARD=sabresd_6dq
 BUMODE=eng
 LUNCHTYPE=${BUBOARD}-${BUMODE}
 BUPARAM=
+ACROSS_COMPILE=prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+KDEFCONF=imx_v7_android_defconfig
+UDEFCONF=mx6qsabresdandroid_config
 
 if [ "${AVER}" = "5.0.2_r1" ]; then
 	BUBOARD=sabresd_6dq
@@ -64,6 +67,7 @@ if [ "${AVER}" = "5.0.2_r1" ]; then
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 	BUPARAM="BUILD_TARGET_DEVICE=sd"
+	ACROSS_COMPILE=prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 fi
 if [ "${AVER}" = "4.4.3_r1" ]; then
 	BUMODE=eng
@@ -78,6 +82,12 @@ if [ "${AVER}" = "4.2.2_r1" ]; then
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
 
+
+if [ "${AVER}" = "4.4.3_r1" ]; then
+	#export JAVA_HOME=/usr/lib/jvm/jdk1.6.0_45
+	export JAVA_HOME=/home/span/workshop/bin/jdk1.6.0_45
+	export PATH=/home/span/workshop/bin/jdk1.6.0_45/bin:$PATH
+fi
 
 ###java -version > ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 ###JAVAVER=`java -version`
@@ -105,6 +115,46 @@ export USE_CCACHE=1
 #prebuilts/misc/linux-x86/ccache/ccache -M 25G
 CCACHE_BIN=`find ./ -type f -path "*linux-x86*" -name \ccache`
 ${CCACHE_BIN} -M 25G
+
+
+if [ "kernel" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	echo "" >> ${LOGFILE}
+
+	cd kernel_imx
+	_TIMEBUILDSTART=$(date +"%s")
+	make distclean ARCH=arm
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
+if [ "uboot" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/ubuild-${NOWTIME}-[]-log.txt
+	echo "" >> ${LOGFILE}
+
+	cd bootable/bootloader/uboot-imx
+	_TIMEBUILDSTART=$(date +"%s")
+	make distclean ARCH=arm
+	make ${UDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
 export OUT_DIR_COMMON_BASE=${OUT_DIR}
 LOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 
