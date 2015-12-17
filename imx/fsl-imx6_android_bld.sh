@@ -19,6 +19,7 @@ AVER=4.4.3_r1
 
 
 USERIN=$1
+USERP1=$2
 
 if [ "${USERIN}" = "" ]; then
 	echo "no user input !! try <443> or <422> or <502> or <rogue>"
@@ -95,41 +96,89 @@ export USE_CCACHE=1
 CCACHE_BIN=`find ./ -type f -path "*linux-x86*" -name \ccache`
 ${CCACHE_BIN} -M 25G
 export OUT_DIR_COMMON_BASE=${OUT_DIR}
+LOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 
 . build/envsetup.sh
 lunch ${LUNCHTYPE}
 
-make clean
-java -version > ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+###java -version > ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+###JAVAVER=`java -version`
+JAVAVER=$("java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
 which java
-uname -a >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "ROOT=${AROOT}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "AFOLDER=${AFOLDER}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "OUT_DIR=${OUT_DIR}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "AVER=${AVER}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "LUNCHTYPE=${LUNCHTYPE}" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-echo "**************************************************" >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+###uname -a >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+SYSTEMNAME=`uname -a`
+
+echo "**************************************************" >> ${LOGFILE}
+echo "JAVA version=${JAVAVER}" >> ${LOGFILE}
+echo "System name=${SYSTEMNAME}" >> ${LOGFILE}
+echo "ROOT=${AROOT}" >> ${LOGFILE}
+echo "AFOLDER=${AFOLDER}" >> ${LOGFILE}
+echo "OUT_DIR=${OUT_DIR}" >> ${LOGFILE}
+echo "AVER=${AVER}" >> ${LOGFILE}
+echo "LUNCHTYPE=${LUNCHTYPE}" >> ${LOGFILE}
+echo "**************************************************" >> ${LOGFILE}
+
+OUTTARGETBOARD=${OUT_DIR}/${AFOLDER}/target/product/${BUBOARD}
+if [ "fast" = "${USERP1}" ]; then
+	echo "NOT doing clean on out..." >> ${LOGFILE}
+	rm -rf ${OUTTARGETBOARD}/*.img
+	rm -rf ${OUTTARGETBOARD}/u-boot*.*
+else
+	echo "GO doing clean on out..." >> ${LOGFILE}
+	make clean
+fi
+
 
 touch startTIME
 _TIMEBUILDSTART=$(date +"%s")
-make -j${CPUS} ${BUPARAM} 2>&1 | tee -a ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+make -j${CPUS} ${BUPARAM} 2>&1 | tee -a ${LOGFILE}
 touch endTIME
 _TIMEBUILDEND=$(date +"%s")
 _TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
 
+echo "" >> ${LOGFILE}
+echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+echo "" >> ${LOGFILE}
+
+
+
 
 if [ "${AVER}" = "4.4.3_r1" ]; then
+	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
-	mkdir -p out/target/product/${BUBOARD}/NAND
-	mv out/target/product/${BUBOARD}/boot*.img out/target/product/${BUBOARD}/NAND
-	mv out/target/product/${BUBOARD}/recovery*.img out/target/product/${BUBOARD}/NAND
-	rm -rf out/target/product/${BUBOARD}/root
-	rm -rf out/target/product/${BUBOARD}/boot*.img
-	rm -rf out/target/product/${BUBOARD}/recovery
-	rm -rf out/target/product/${BUBOARD}/recovery*.img
+	mkdir -p ${OUTTARGETBOARD}/NAND
+	mv ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
+	mv ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/NAND
+	rm -rf ${OUTTARGETBOARD}/root
+	rm -rf ${OUTTARGETBOARD}/boot*.img
+	rm -rf ${OUTTARGETBOARD}/recovery
+	rm -rf ${OUTTARGETBOARD}/recovery*.img
 	
-	make -j${CPUS} bootimage BUILD_TARGET_DEVICE=sd 2>&1 | tee ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
+	echo "**************************************************" >> ${SDLOGFILE}
+	echo "JAVA version=${JAVAVER}" >> ${SDLOGFILE}
+	echo "System name=${SYSTEMNAME}" >> ${SDLOGFILE}
+	echo "ROOT=${AROOT}" >> ${SDLOGFILE}
+	echo "AFOLDER=${AFOLDER}" >> ${SDLOGFILE}
+	echo "OUT_DIR=${OUT_DIR}" >> ${SDLOGFILE}
+	echo "AVER=${AVER}" >> ${SDLOGFILE}
+	echo "LUNCHTYPE=${LUNCHTYPE}" >> ${SDLOGFILE}
+	echo "bootimage BUILD_TARGET_DEVICE=sd" >> ${SDLOGFILE}
+	echo "**************************************************" >> ${SDLOGFILE}
+	
+	_TIMEBUILDSTARTSD=$(date +"%s")
+	make -j${CPUS} bootimage BUILD_TARGET_DEVICE=sd 2>&1 | tee -a ${SDLOGFILE}
+	_TIMEBUILDENDSD=$(date +"%s")
+	_TIMEBUILDSD=$(($_TIMEBUILDENDSD-$_TIMEBUILDSTARTSD))
 	touch endTIMEsd
+
+	mkdir -p ${OUTTARGETBOARD}/SDMMC
+	cp ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/SDMMC
+	cp ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/SDMMC
+
+	echo "" >> ${SDLOGFILE}
+	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
+	echo "" >> ${SDLOGFILE}
+
 fi
 
 cd ${AROOT}
@@ -139,5 +188,6 @@ echo "${_Br}#"
 echo "# build    time=${_TIMEBUILD} seconds."
 #echo "# mkubi    time=${_TIMEMKUBI} seconds."
 echo "#${_Tr}"
+
 
 # _E_O_F_
