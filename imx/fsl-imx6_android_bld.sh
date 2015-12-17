@@ -78,7 +78,17 @@ if [ "${AVER}" = "4.2.2_r1" ]; then
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
 
+
+###java -version > ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+###JAVAVER=`java -version`
+JAVAVER=$("java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+which java
+###uname -a >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+SYSTEMNAME=`uname -a`
+
 echo "**************************************************"
+echo "JAVA version=${JAVAVER}"
+echo "System name=${SYSTEMNAME}"
 echo "ROOT=${AROOT}"
 echo "AFOLDER=${AFOLDER}"
 echo "OUT_DIR=${OUT_DIR}"
@@ -100,13 +110,6 @@ LOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
 
 . build/envsetup.sh
 lunch ${LUNCHTYPE}
-
-###java -version > ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-###JAVAVER=`java -version`
-JAVAVER=$("java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-which java
-###uname -a >> ${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
-SYSTEMNAME=`uname -a`
 
 echo "**************************************************" >> ${LOGFILE}
 echo "JAVA version=${JAVAVER}" >> ${LOGFILE}
