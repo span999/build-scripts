@@ -66,7 +66,7 @@ if [ "${AVER}" = "5.0.2_r1" ]; then
 	#BUMODE=user
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
-	BUPARAM="BUILD_TARGET_DEVICE=sd"
+	#BUPARAM="BUILD_TARGET_DEVICE=sd"
 	ACROSS_COMPILE=prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 fi
 if [ "${AVER}" = "4.4.3_r1" ]; then
@@ -104,6 +104,7 @@ echo "AFOLDER=${AFOLDER}"
 echo "OUT_DIR=${OUT_DIR}"
 echo "AVER=${AVER}"
 echo "LUNCHTYPE=${LUNCHTYPE}"
+echo "BUPARAM=${BUPARAM}"
 echo "**************************************************"
 
 cd ${WSPATH}
@@ -169,6 +170,7 @@ echo "AFOLDER=${AFOLDER}" >> ${LOGFILE}
 echo "OUT_DIR=${OUT_DIR}" >> ${LOGFILE}
 echo "AVER=${AVER}" >> ${LOGFILE}
 echo "LUNCHTYPE=${LUNCHTYPE}" >> ${LOGFILE}
+echo "BUPARAM=${BUPARAM}" >> ${LOGFILE}
 echo "**************************************************" >> ${LOGFILE}
 
 OUTTARGETBOARD=${OUT_DIR}/${AFOLDER}/target/product/${BUBOARD}
@@ -176,6 +178,8 @@ if [ "fast" = "${USERP1}" ]; then
 	echo "NOT doing clean on out..." >> ${LOGFILE}
 	rm -rf ${OUTTARGETBOARD}/*.img
 	rm -rf ${OUTTARGETBOARD}/u-boot*.*
+	rm -rf ${OUTTARGETBOARD}/NAND
+	rm -rf ${OUTTARGETBOARD}/SDMMC
 else
 	echo "GO doing clean on out..." >> ${LOGFILE}
 	make clean
@@ -196,16 +200,22 @@ echo "" >> ${LOGFILE}
 
 
 
-if [ "${AVER}" = "4.4.3_r1" ]; then
+if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" ]; then
+	BUPARAM="BUILD_TARGET_DEVICE=sd"
 	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
 	mkdir -p ${OUTTARGETBOARD}/NAND
 	mv ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
 	mv ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/NAND
+	mv ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/NAND
 	rm -rf ${OUTTARGETBOARD}/root
 	rm -rf ${OUTTARGETBOARD}/boot*.img
 	rm -rf ${OUTTARGETBOARD}/recovery
 	rm -rf ${OUTTARGETBOARD}/recovery*.img
+	if [ "${AVER}" = "5.0.2_r1" ]; then
+		rm -rf ${OUTTARGETBOARD}/system
+		rm -rf ${OUTTARGETBOARD}/system.img
+	fi
 	
 	echo "**************************************************" >> ${SDLOGFILE}
 	echo "JAVA version=${JAVAVER}" >> ${SDLOGFILE}
@@ -215,11 +225,13 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	echo "OUT_DIR=${OUT_DIR}" >> ${SDLOGFILE}
 	echo "AVER=${AVER}" >> ${SDLOGFILE}
 	echo "LUNCHTYPE=${LUNCHTYPE}" >> ${SDLOGFILE}
-	echo "bootimage BUILD_TARGET_DEVICE=sd" >> ${SDLOGFILE}
+	echo "BUPARAM=${BUPARAM}" >> ${SDLOGFILE}
+	#echo "bootimage BUILD_TARGET_DEVICE=sd" >> ${SDLOGFILE}
 	echo "**************************************************" >> ${SDLOGFILE}
 	
 	_TIMEBUILDSTARTSD=$(date +"%s")
-	make -j${CPUS} bootimage BUILD_TARGET_DEVICE=sd 2>&1 | tee -a ${SDLOGFILE}
+	#make -j${CPUS} bootimage ${BUPARAM} 2>&1 | tee -a ${SDLOGFILE}
+	make -j${CPUS} ${BUPARAM} 2>&1 | tee -a ${SDLOGFILE}
 	_TIMEBUILDENDSD=$(date +"%s")
 	_TIMEBUILDSD=$(($_TIMEBUILDENDSD-$_TIMEBUILDSTARTSD))
 	touch endTIMEsd
@@ -227,6 +239,17 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	mkdir -p ${OUTTARGETBOARD}/SDMMC
 	cp ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/SDMMC
 	cp ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/SDMMC
+	if [ "${AVER}" = "5.0.2_r1" ]; then
+		cp ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/SDMMC
+	fi
+
+	echo "#!/bin/sh" > ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "#" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=../u-boot-imx6q.imx of=/dev/sde bs=1k seek=1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=boot.img of=/dev/sde1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=recovery.img of=/dev/sde2; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=system.img of=/dev/sde5; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 
 	echo "" >> ${SDLOGFILE}
 	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
