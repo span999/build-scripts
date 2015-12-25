@@ -130,7 +130,7 @@ if [ "kernel" = "${USERP1}" ]; then
 
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
-	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make dtbs ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
@@ -144,6 +144,33 @@ if [ "kernel" = "${USERP1}" ]; then
 	exit 0
 fi
 
+if [ "dts" = "${USERP1}" ]; then
+	#KDEFCONF=imx_v7_defconfig
+	KDEFCONF=imx_v7_android_defconfig
+	#KDEFCONF=imx_v7_N488_defconfig
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	echo "" >> ${LOGFILE}
+
+	#cd kernel_imx
+	cd ${AROOT}/kernel/kernel_imx
+
+	_TIMEBUILDSTART=$(date +"%s")
+	make distclean ARCH=arm
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	#make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	make dtbs ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "defconfig=${KDEFCONF}" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
+
 if [ "uboot" = "${USERP1}" ]; then
 	LOGFILE=${AROOT}/logs/ubuild-${NOWTIME}-[]-log.txt
 	echo "" >> ${LOGFILE}
@@ -153,7 +180,7 @@ if [ "uboot" = "${USERP1}" ]; then
 
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
-	make ${UDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make ${UDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
