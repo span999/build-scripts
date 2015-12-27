@@ -175,7 +175,7 @@ echo "**************************************************" >> ${LOGFILE}
 
 OUTTARGETBOARD=${OUT_DIR}/${AFOLDER}/target/product/${BUBOARD}
 if [ "fast" = "${USERP1}" ]; then
-	echo "NOT doing clean on out..." >> ${LOGFILE}
+	echo "fast build, NOT doing clean on out..." >> ${LOGFILE}
 	rm -rf ${OUTTARGETBOARD}/*.img
 	rm -rf ${OUTTARGETBOARD}/u-boot*.*
 	rm -rf ${OUTTARGETBOARD}/NAND
@@ -183,6 +183,61 @@ if [ "fast" = "${USERP1}" ]; then
 else
 	echo "GO doing clean on out..." >> ${LOGFILE}
 	make clean
+fi
+
+if [ "bootimage" = "${USERP1}" ]; then
+	echo "bootimage only, NOT doing clean on out..." >> ${LOGFILE}
+	rm -rf ${OUTTARGETBOARD}/boot*.img
+	#rm -rf ${OUTTARGETBOARD}/root
+
+	touch startTIME
+	_TIMEBUILDSTART=$(date +"%s")
+	make bootimage -j${CPUS} ${BUPARAM} 2>&1 | tee -a ${LOGFILE}
+	touch endTIME
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+
+	BUPARAM="BUILD_TARGET_DEVICE=sd"
+	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
+	touch startTIMEsd
+	mkdir -p ${OUTTARGETBOARD}/NAND
+	mv -f ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
+	#rm -rf ${OUTTARGETBOARD}/root
+	rm -rf ${OUTTARGETBOARD}/boot*.img
+	
+	echo "**************************************************" >> ${SDLOGFILE}
+	echo "JAVA version=${JAVAVER}" >> ${SDLOGFILE}
+	echo "System name=${SYSTEMNAME}" >> ${SDLOGFILE}
+	echo "ROOT=${AROOT}" >> ${SDLOGFILE}
+	echo "AFOLDER=${AFOLDER}" >> ${SDLOGFILE}
+	echo "OUT_DIR=${OUT_DIR}" >> ${SDLOGFILE}
+	echo "AVER=${AVER}" >> ${SDLOGFILE}
+	echo "LUNCHTYPE=${LUNCHTYPE}" >> ${SDLOGFILE}
+	echo "BUPARAM=${BUPARAM}" >> ${SDLOGFILE}
+	#echo "bootimage BUILD_TARGET_DEVICE=sd" >> ${SDLOGFILE}
+	echo "**************************************************" >> ${SDLOGFILE}	
+	echo "bootimage only, NOT doing clean on out..." >> ${SDLOGFILE}
+
+	_TIMEBUILDSTARTSD=$(date +"%s")
+	#make -j${CPUS} bootimage ${BUPARAM} 2>&1 | tee -a ${SDLOGFILE}
+	make bootimage -j${CPUS} ${BUPARAM} 2>&1 | tee -a ${SDLOGFILE}
+	_TIMEBUILDENDSD=$(date +"%s")
+	_TIMEBUILDSD=$(($_TIMEBUILDENDSD-$_TIMEBUILDSTARTSD))
+	touch endTIMEsd
+
+	mkdir -p ${OUTTARGETBOARD}/SDMMC
+	cp -f ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/SDMMC
+
+	echo "" >> ${SDLOGFILE}
+	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
+	echo "" >> ${SDLOGFILE}
+
+
+	exit 0
 fi
 
 
