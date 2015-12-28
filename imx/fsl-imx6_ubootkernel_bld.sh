@@ -129,8 +129,8 @@ if [ "kernel" = "${USERP1}" ]; then
 	cd ${AROOT}/kernel/kernel_imx
 
 	_TIMEBUILDSTART=$(date +"%s")
-	make distclean ARCH=arm
-	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	#make distclean ARCH=arm
+	#make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make dtbs ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
@@ -139,6 +139,7 @@ if [ "kernel" = "${USERP1}" ]; then
 	echo "" >> ${LOGFILE}
 	echo "defconfig=${KDEFCONF}" >> ${LOGFILE}
 	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds."
 	echo "" >> ${LOGFILE}
 	cd -
 	exit 0
@@ -155,7 +156,7 @@ if [ "dts" = "${USERP1}" ]; then
 	cd ${AROOT}/kernel/kernel_imx
 
 	_TIMEBUILDSTART=$(date +"%s")
-	make distclean ARCH=arm
+	#make distclean ARCH=arm
 	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	#make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make dtbs ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
