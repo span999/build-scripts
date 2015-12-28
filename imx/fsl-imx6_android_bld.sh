@@ -236,9 +236,16 @@ if [ "bootimage" = "${USERP1}" ]; then
 	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
 	echo "" >> ${SDLOGFILE}
 
-
 	exit 0
 fi
+
+if [ "fast" = "${USERP1}" -o "bootimage" = "${USERP1}" ]; then
+	echo ""
+else
+	echo "GO doing clean on out..." >> ${LOGFILE}
+	make clean
+fi
+
 
 
 touch startTIME
