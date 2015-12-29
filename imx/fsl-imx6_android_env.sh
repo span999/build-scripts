@@ -136,7 +136,6 @@ echo $PATH
 which java
 java -version
 
-
 if [ ! -d ${TARBALLDIR} ]; then
 	mkdir -p ${TARBALLDIR}
 fi

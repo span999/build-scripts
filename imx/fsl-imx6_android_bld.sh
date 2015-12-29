@@ -180,15 +180,12 @@ if [ "fast" = "${USERP1}" ]; then
 	rm -rf ${OUTTARGETBOARD}/u-boot*.*
 	rm -rf ${OUTTARGETBOARD}/NAND
 	rm -rf ${OUTTARGETBOARD}/SDMMC
-else
-	echo "GO doing clean on out..." >> ${LOGFILE}
-	make clean
 fi
 
 if [ "bootimage" = "${USERP1}" ]; then
 	echo "bootimage only, NOT doing clean on out..." >> ${LOGFILE}
 	rm -rf ${OUTTARGETBOARD}/boot*.img
-	#rm -rf ${OUTTARGETBOARD}/root
+	rm -rf ${OUTTARGETBOARD}/root
 
 	touch startTIME
 	_TIMEBUILDSTART=$(date +"%s")
@@ -206,7 +203,7 @@ if [ "bootimage" = "${USERP1}" ]; then
 	touch startTIMEsd
 	mkdir -p ${OUTTARGETBOARD}/NAND
 	mv -f ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
-	#rm -rf ${OUTTARGETBOARD}/root
+	rm -rf ${OUTTARGETBOARD}/root
 	rm -rf ${OUTTARGETBOARD}/boot*.img
 	
 	echo "**************************************************" >> ${SDLOGFILE}
