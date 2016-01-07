@@ -34,7 +34,7 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USE
 	if [ "${USERIN}" = "422" ]; then
 		AVER=4.2.2_r1
 	fi
-	if [ "${USERIN}" = "502" ]; then
+	if [ "${USERIN}" = "502" -o "${USERIN}" = "n425-50" ]; then
 		AVER=5.0.2_r1
 	fi
 else
