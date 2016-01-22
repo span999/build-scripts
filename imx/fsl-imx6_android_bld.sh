@@ -79,6 +79,7 @@ if [ "${USERIN}" = "rogue" ]; then
 	#for rogue n535
 	BUBOARD=sabresd_6dq_n535
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
+	KDEFCONF=imx_v7_android_rogue_defconfig
 fi
 if [ "${USERIN}" = "sabresd_6dq" ]; then
 	BUMODE=eng
@@ -132,7 +133,7 @@ if [ "kernel" = "${USERP1}" ]; then
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
 	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
-	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
 
@@ -151,7 +152,7 @@ if [ "uboot" = "${USERP1}" ]; then
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
 	make ${UDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
-	make -j12 ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	make -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
 
