@@ -22,13 +22,13 @@ USERIN=$1
 USERP1=$2
 
 if [ "${USERIN}" = "" ]; then
-	echo "no user input !! try <443> or <422> or <502> or <rogue>"
+	echo "no user input !! try <443> or <422> or <502> or <rogue> or <sabresd_6dq>"
 	exit
 fi
 
-if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "rogue" ]; then
+if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 	echo "  user input =<${USERIN}> para1 =<${USERP1}>"
-	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" ]; then
+	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 		AVER=4.4.3_r1
 	fi
 	if [ "${USERIN}" = "422" ]; then
@@ -43,7 +43,7 @@ else
 fi
 
 
-if [ "${USERIN}" = "rogue" ]; then
+if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 	WSFOLDER=rogue-fsl
 else
 	WSFOLDER=anadroid-fsl
@@ -52,6 +52,7 @@ WSPATH=${AROOT}/${WSFOLDER}
 OUT_DIR=${AROOT}/${WSFOLDER}/out
 AFOLDER=android-${AVER}
 #BUBOARD=aosp_arm-eng  #for original android build
+#for EVK
 BUBOARD=sabresd_6dq
 #BUMODE=user
 BUMODE=eng
@@ -75,14 +76,19 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 fi
 if [ "${USERIN}" = "rogue" ]; then
 	BUMODE=eng
+	#for rogue n535
+	BUBOARD=sabresd_6dq_n535
+	LUNCHTYPE=${BUBOARD}-${BUMODE}
+fi
+if [ "${USERIN}" = "sabresd_6dq" ]; then
+	BUMODE=eng
+	BUBOARD=sabresd_6dq
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
 if [ "${AVER}" = "4.2.2_r1" ]; then
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
-
-
 if [ "${AVER}" = "4.4.3_r1" ]; then
 	#export JAVA_HOME=/usr/lib/jvm/jdk1.6.0_45
 	export JAVA_HOME=/home/span/workshop/bin/jdk1.6.0_45
