@@ -29,7 +29,7 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USE
 	if [ "${USERIN}" = "422" ]; then
 		AVER=4.2.2_r1
 	fi
-	if [ "${USERIN}" = "502" ]; then
+	if [ "${USERIN}" = "502" -o "${USERIN}" = "n425-50" ]; then
 		AVER=5.0.2_r1
 	fi
 else
@@ -183,6 +183,41 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	patch -p1 < ${TARBALLDIR}/${PATCH001}
 	cd -
 fi
+
+if [ "${USERIN}" = "n425-50" ]; then
+	if [ ! -d ${WSPATH} ]; then
+		mkdir -p ${WSPATH} 
+	fi
+
+	cd ${AFOLDER}
+	rm -rf kernel_imx
+	if [ ! -d kernel_imx ]; then
+		git clone https://spanliu@bitbucket.org/sp_linuxkernel/linux-2.6-imx.git -b l5.0.0_1.0.0-ga_n488
+		#git clone git@bitbucket.org:sp_linuxkernel/linux-2.6-imx.git -b N535-Rogue-AVM
+	fi
+	cd kernel_imx
+	git l5.0.0_1.0.0-ga_n488
+	git pull
+	cd -
+	cd -
+
+	cd ${AFOLDER}/bootable/bootloader
+	rm -rf uboot-imx
+	if [ ! -d uboot-imx  ]; then
+		git clone https://spanliu@bitbucket.org/sp_uboot/uboot-imx-all.git -b l5.0.0_1.0.0-ga_n425
+		#git clone git@bitbucket.org:sp_uboot/uboot-imx-all.git -b l5.0.0_1.0.0-ga_n425
+	fi
+	cd uboot-imx 
+	git checkout l5.0.0_1.0.0-ga_n425
+	git pull
+	cd -
+	cd -
+	
+	echo ""
+	echo "ready for rogue build."
+	exit 0
+fi
+
 
 cd ${AROOT}
 echo $PATH
