@@ -134,6 +134,7 @@ if [ "kernel" = "${USERP1}" ]; then
 	make distclean ARCH=arm
 	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
 
@@ -242,8 +243,12 @@ if [ "bootimage" = "${USERP1}" ]; then
 
 	exit 0
 fi
+if [ "recoveryimage" = "${USERP1}" ]; then
+	echo ""
+fi
 
-if [ "fast" = "${USERP1}" -o "bootimage" = "${USERP1}" ]; then
+
+if [ "fast" = "${USERP1}" -o "bootimage" = "${USERP1}" -o "recoveryimage" = "${USERP1}" ]; then
 	echo ""
 else
 	echo "GO doing clean on out..." >> ${LOGFILE}
