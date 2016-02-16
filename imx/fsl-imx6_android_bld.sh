@@ -279,6 +279,7 @@ if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" ]; then
 	mv ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
 	mv ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/NAND
 	mv ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/NAND
+	cp ${OUTTARGETBOARD}/u-boot* ${OUTTARGETBOARD}/NAND
 	rm -rf ${OUTTARGETBOARD}/root
 	rm -rf ${OUTTARGETBOARD}/boot*.img
 	rm -rf ${OUTTARGETBOARD}/recovery
@@ -313,14 +314,15 @@ if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" ]; then
 	if [ "${AVER}" = "5.0.2_r1" ]; then
 		cp ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/SDMMC
 	fi
+	cp ${OUTTARGETBOARD}/u-boot* ${OUTTARGETBOARD}/SDMMC
 
 	echo "#!/bin/sh" > ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 	echo "#" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 	echo "" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
-	echo "sudo dd if=../u-boot-imx6q.imx of=/dev/sde bs=1k seek=1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
-	echo "sudo dd if=boot.img of=/dev/sde1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
-	echo "sudo dd if=recovery.img of=/dev/sde2; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
-	echo "sudo dd if=system.img of=/dev/sde5; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=u-boot-imx6q.imx of=/dev/sde bs=1k seek=1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=boot-imx6q-ldo.img of=/dev/sde1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=recovery-imx6q-ldo.img of=/dev/sde2; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=../system.img of=/dev/sde5; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 
 	echo "" >> ${SDLOGFILE}
 	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
