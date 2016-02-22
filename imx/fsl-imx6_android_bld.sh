@@ -14,6 +14,7 @@ AROOT=`pwd`
 CPUS=12
 
 #AVER=5.0.2_r1
+#AVER=5.1.1_r1
 AVER=4.4.3_r1
 #AVER=4.2.2_r1
 
@@ -22,11 +23,11 @@ USERIN=$1
 USERP1=$2
 
 if [ "${USERIN}" = "" ]; then
-	echo "no user input !! try <443> or <422> or <502> or <rogue> or <sabresd_6dq>"
+	echo "no user input !! try <443> or <422> or <502> or <511> or <rogue> or <sabresd_6dq>"
 	exit
 fi
 
-if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
+if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "511" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 	echo "  user input =<${USERIN}> para1 =<${USERP1}>"
 	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 		AVER=4.4.3_r1
@@ -37,8 +38,11 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USE
 	if [ "${USERIN}" = "502" -o "${USERIN}" = "n425-50" ]; then
 		AVER=5.0.2_r1
 	fi
+	if [ "${USERIN}" = "511" ]; then
+		AVER=5.1.1_r1
+	fi
 else
-	echo "wrong user input !! try <443> or <422> or <502> or <rogue>"
+	echo "wrong user input !! try <443> or <422> or <502> or <511> or <rogue>"
 	exit
 fi
 
@@ -62,6 +66,14 @@ ACROSS_COMPILE=prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 KDEFCONF=imx_v7_android_defconfig
 UDEFCONF=mx6qsabresdandroid_config
 
+if [ "${AVER}" = "5.1.1_r1" ]; then
+	BUBOARD=sabresd_6dq
+	#BUMODE=user
+	BUMODE=eng
+	LUNCHTYPE=${BUBOARD}-${BUMODE}
+	#BUPARAM="BUILD_TARGET_DEVICE=sd"
+	ACROSS_COMPILE=prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+fi
 if [ "${AVER}" = "5.0.2_r1" ]; then
 	BUBOARD=sabresd_6dq
 	#BUMODE=user
