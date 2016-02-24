@@ -27,7 +27,7 @@ if [ "${USERIN}" = "" ]; then
 	exit
 fi
 
-if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "511" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
+if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USERIN}" = "511" -o "${USERIN}" = "rogue" -o "${USERIN}" = "rogue511" -o "${USERIN}" = "sabresd_6dq" ]; then
 	echo "  user input =<${USERIN}> para1 =<${USERP1}>"
 	if [ "${USERIN}" = "443" -o "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 		AVER=4.4.3_r1
@@ -38,7 +38,7 @@ if [ "${USERIN}" = "443" -o "${USERIN}" = "422" -o "${USERIN}" = "502" -o "${USE
 	if [ "${USERIN}" = "502" -o "${USERIN}" = "n425-50" ]; then
 		AVER=5.0.2_r1
 	fi
-	if [ "${USERIN}" = "511" ]; then
+	if [ "${USERIN}" = "511" -o "${USERIN}" = "rogue511" ]; then
 		AVER=5.1.1_r1
 	fi
 else
@@ -47,6 +47,7 @@ else
 fi
 
 
+## if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" -o "${USERIN}" = "rogue511" ]; then
 if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 	WSFOLDER=rogue-fsl
 else
@@ -86,7 +87,8 @@ if [ "${AVER}" = "4.4.3_r1" ]; then
 	BUMODE=eng
 	LUNCHTYPE=${BUBOARD}-${BUMODE}
 fi
-if [ "${USERIN}" = "rogue" ]; then
+
+if [ "${USERIN}" = "rogue" -o "${USERIN}" = "rogue511" ]; then
 	BUMODE=eng
 	#for rogue n535
 	BUBOARD=sabresd_6dq_n535
@@ -283,7 +285,7 @@ echo "" >> ${LOGFILE}
 
 
 
-if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" ]; then
+if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${USERIN}" = "rogue511" ]; then
 	BUPARAM="BUILD_TARGET_DEVICE=sd"
 	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
@@ -296,7 +298,7 @@ if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" ]; then
 	rm -rf ${OUTTARGETBOARD}/boot*.img
 	rm -rf ${OUTTARGETBOARD}/recovery
 	rm -rf ${OUTTARGETBOARD}/recovery*.img
-	if [ "${AVER}" = "5.0.2_r1" ]; then
+	if [ "${AVER}" = "5.0.2_r1" -o "${AVER}" = "5.1.1_r1" ]; then
 		rm -rf ${OUTTARGETBOARD}/system
 		rm -rf ${OUTTARGETBOARD}/system.img
 	fi
