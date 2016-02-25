@@ -47,8 +47,8 @@ else
 fi
 
 
-## if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" -o "${USERIN}" = "rogue511" ]; then
-if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
+if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" -o "${USERIN}" = "rogue511" ]; then
+###if [ "${USERIN}" = "rogue" -o "${USERIN}" = "sabresd_6dq" ]; then
 	WSFOLDER=rogue-fsl
 else
 	WSFOLDER=anadroid-fsl
@@ -141,13 +141,53 @@ ${CCACHE_BIN} -M 25G
 
 if [ "kernel" = "${USERP1}" ]; then
 	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
-	echo "" >> ${LOGFILE}
+	echo "kernel build ..." >> ${LOGFILE}
 
 	cd kernel_imx
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
 	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
+if [ "kernel-fast" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	echo "kernel fast build ..." >> ${LOGFILE}
+
+	cd kernel_imx
+	_TIMEBUILDSTART=$(date +"%s")
+	#make distclean ARCH=arm
+	#make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
+if [ "kernel-dts" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	echo "kernel dts build ..." >> ${LOGFILE}
+
+	cd kernel_imx
+	_TIMEBUILDSTART=$(date +"%s")
+	#make distclean ARCH=arm
+	#make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	#make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
