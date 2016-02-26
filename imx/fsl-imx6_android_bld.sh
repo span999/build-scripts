@@ -146,7 +146,7 @@ if [ "kernel" = "${USERP1}" ]; then
 	cd kernel_imx
 	_TIMEBUILDSTART=$(date +"%s")
 	make distclean ARCH=arm
-	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
@@ -165,9 +165,11 @@ if [ "kernel-fast" = "${USERP1}" ]; then
 
 	cd kernel_imx
 	_TIMEBUILDSTART=$(date +"%s")
+	rm arch/arm/boot/dts/*.dtb
 	#make distclean ARCH=arm
 	#make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
 	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	#make modules -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" O=${OUT_DIR}/${AFOLDER}/target/product/kernel-modules 2>&1 | tee -a ${LOGFILE}
 	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
 	_TIMEBUILDEND=$(date +"%s")
 	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
@@ -179,12 +181,42 @@ if [ "kernel-fast" = "${USERP1}" ]; then
 	exit 0
 fi
 
+if [ "kernel-modules" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	echo "kernel modules build ..." >> ${LOGFILE}
+	_KOUT=${OUT_DIR}/${AFOLDER}/target/product/kernel-modules
+
+	cd kernel_imx
+	_TIMEBUILDSTART=$(date +"%s")
+	#rm arch/arm/boot/dts/*.dtb
+	make distclean ARCH=arm
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	cp -f .config .modules.config
+	make mrproper
+	make mrproper O=${_KOUT}
+	cp -f .modules.config ${_KOUT}/.config
+	#make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" O=${_KOUT} 2>&1 | tee -a ${LOGFILE}
+	make modules -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" O=${_KOUT} 2>&1 | tee -a ${LOGFILE}
+	make modules_install -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" O=${_KOUT} INSTALL_MOD_PATH=${_KOUT}/installer 2>&1 | tee -a ${LOGFILE}
+	#make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" O=${_KOUT} 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
+
 if [ "kernel-dts" = "${USERP1}" ]; then
 	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
 	echo "kernel dts build ..." >> ${LOGFILE}
 
 	cd kernel_imx
 	_TIMEBUILDSTART=$(date +"%s")
+	rm arch/arm/boot/dts/*.dtb
 	#make distclean ARCH=arm
 	#make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}
 	#make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
