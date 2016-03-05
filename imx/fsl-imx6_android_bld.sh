@@ -140,7 +140,7 @@ ${CCACHE_BIN} -M 25G
 
 
 if [ "kernel" = "${USERP1}" ]; then
-	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[${USERIN}][]-log.txt
 	echo "kernel build ..." >> ${LOGFILE}
 
 	cd kernel_imx
@@ -159,8 +159,29 @@ if [ "kernel" = "${USERP1}" ]; then
 	exit 0
 fi
 
+if [ "kernel-org" = "${USERP1}" ]; then
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[${USERIN}][korg]-log.txt
+	echo "kernel build ..." >> ${LOGFILE}
+	KDEFCONF=imx_v7_android_defconfig
+
+	cd kernel_imx
+	_TIMEBUILDSTART=$(date +"%s")
+	make distclean ARCH=arm
+	make ${KDEFCONF} ARCH=arm CROSS_COMPILE=${WSPATH}/${AFOLDER}/${ACROSS_COMPILE} 2>&1 | tee -a ${LOGFILE}
+	make uImage LOADADDR=0x10008000 -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	make dtbs -j12 ARCH=arm CROSS_COMPILE="ccache ${WSPATH}/${AFOLDER}/${ACROSS_COMPILE}" 2>&1 | tee -a ${LOGFILE}
+	_TIMEBUILDEND=$(date +"%s")
+	_TIMEBUILD=$(($_TIMEBUILDEND-$_TIMEBUILDSTART))
+
+	echo "" >> ${LOGFILE}
+	echo "# build    time=${_TIMEBUILD} seconds." >> ${LOGFILE}
+	echo "" >> ${LOGFILE}
+	cd -
+	exit 0
+fi
+
 if [ "kernel-fast" = "${USERP1}" ]; then
-	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[${USERIN}][fast]-log.txt
 	echo "kernel fast build ..." >> ${LOGFILE}
 
 	cd kernel_imx
@@ -182,7 +203,7 @@ if [ "kernel-fast" = "${USERP1}" ]; then
 fi
 
 if [ "kernel-modules" = "${USERP1}" ]; then
-	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[${USERIN}][modules]-log.txt
 	echo "kernel modules build ..." >> ${LOGFILE}
 	_KOUT=${OUT_DIR}/${AFOLDER}/target/product/kernel-modules
 
@@ -211,7 +232,7 @@ fi
 
 
 if [ "kernel-dts" = "${USERP1}" ]; then
-	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[]-log.txt
+	LOGFILE=${AROOT}/logs/kbuild-${NOWTIME}-[${USERIN}][dts]-log.txt
 	echo "kernel dts build ..." >> ${LOGFILE}
 
 	cd kernel_imx
@@ -232,7 +253,7 @@ if [ "kernel-dts" = "${USERP1}" ]; then
 fi
 
 if [ "uboot" = "${USERP1}" ]; then
-	LOGFILE=${AROOT}/logs/ubuild-${NOWTIME}-[]-log.txt
+	LOGFILE=${AROOT}/logs/ubuild-${NOWTIME}-[${USERIN}][]-log.txt
 	echo "" >> ${LOGFILE}
 
 	cd bootable/bootloader/uboot-imx
@@ -251,7 +272,7 @@ if [ "uboot" = "${USERP1}" ]; then
 fi
 
 export OUT_DIR_COMMON_BASE=${OUT_DIR}
-LOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]-log.txt
+LOGFILE=${AROOT}/logs/build-${NOWTIME}-[${USERIN}][${LUNCHTYPE}]-log.txt
 
 . build/envsetup.sh
 lunch ${LUNCHTYPE}
@@ -293,7 +314,7 @@ if [ "bootimage" = "${USERP1}" ]; then
 	echo "" >> ${LOGFILE}
 
 	BUPARAM="BUILD_TARGET_DEVICE=sd"
-	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
+	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${USERIN}][${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
 	mkdir -p ${OUTTARGETBOARD}/NAND
 	mv -f ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
@@ -335,7 +356,15 @@ fi
 
 
 if [ "fast" = "${USERP1}" -o "bootimage" = "${USERP1}" -o "recoveryimage" = "${USERP1}" ]; then
-	echo ""
+	echo "GO FAST clean on few..."
+	rm -rf ${OUTTARGETBOARD}/root
+	rm -rf ${OUTTARGETBOARD}/boot*.img
+	rm -rf ${OUTTARGETBOARD}/recovery
+	rm -rf ${OUTTARGETBOARD}/recovery*.img
+	if [ "${AVER}" = "5.0.2_r1" -o "${AVER}" = "5.1.1_r1" ]; then
+		rm -rf ${OUTTARGETBOARD}/system
+		rm -rf ${OUTTARGETBOARD}/system.img
+	fi
 else
 	echo "GO doing clean on out..." >> ${LOGFILE}
 	make clean
@@ -359,7 +388,7 @@ echo "" >> ${LOGFILE}
 
 if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${USERIN}" = "rogue511" ]; then
 	BUPARAM="BUILD_TARGET_DEVICE=sd"
-	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${LUNCHTYPE}]sd-log.txt
+	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${USERIN}][${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
 	mkdir -p ${OUTTARGETBOARD}/NAND
 	mv ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/NAND
