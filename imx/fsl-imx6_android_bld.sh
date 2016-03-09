@@ -386,7 +386,7 @@ echo "" >> ${LOGFILE}
 
 
 
-if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${USERIN}" = "rogue511" ]; then
+if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${AVER}" = "5.1.1_r1" -o "${USERIN}" = "rogue511" ]; then
 	BUPARAM="BUILD_TARGET_DEVICE=sd"
 	SDLOGFILE=${AROOT}/logs/build-${NOWTIME}-[${USERIN}][${LUNCHTYPE}]sd-log.txt
 	touch startTIMEsd
@@ -426,8 +426,8 @@ if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${USERIN}" = "rogue511
 	mkdir -p ${OUTTARGETBOARD}/SDMMC
 	cp ${OUTTARGETBOARD}/boot*.img ${OUTTARGETBOARD}/SDMMC
 	cp ${OUTTARGETBOARD}/recovery*.img ${OUTTARGETBOARD}/SDMMC
-	if [ "${AVER}" = "5.0.2_r1" ]; then
-		cp ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/SDMMC
+	if [ "${AVER}" = "5.0.2_r1" -o "${AVER}" = "5.1.1_r1" ]; then
+		mv ${OUTTARGETBOARD}/system.img ${OUTTARGETBOARD}/SDMMC
 	fi
 	cp ${OUTTARGETBOARD}/u-boot* ${OUTTARGETBOARD}/SDMMC
 
@@ -437,12 +437,17 @@ if [ "${AVER}" = "4.4.3_r1" -o "${AVER}" = "5.0.2_r1" -o "${USERIN}" = "rogue511
 	echo "sudo dd if=u-boot-imx6q.imx of=/dev/sde bs=1k seek=1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 	echo "sudo dd if=boot-imx6q-ldo.img of=/dev/sde1; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 	echo "sudo dd if=recovery-imx6q-ldo.img of=/dev/sde2; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
-	echo "sudo dd if=../system.img of=/dev/sde5; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
+	echo "sudo dd if=system.img of=/dev/sde5; sync" >> ${OUTTARGETBOARD}/SDMMC/dd.sdmmc.sh
 
 	echo "" >> ${SDLOGFILE}
 	echo "# build    time=${_TIMEBUILDSD} seconds." >> ${SDLOGFILE}
 	echo "" >> ${SDLOGFILE}
 
+fi
+
+if [ "${AVER}" = "5.1.1_r1" ]; then
+	simg2img ${OUTTARGETBOARD}/NAND/system.img ${OUTTARGETBOARD}/NAND/system_raw.img
+	simg2img ${OUTTARGETBOARD}/SDMMC/system.img ${OUTTARGETBOARD}/SDMMC/system_raw.img
 fi
 
 cd ${AROOT}
